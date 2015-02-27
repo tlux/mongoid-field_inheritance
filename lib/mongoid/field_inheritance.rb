@@ -27,17 +27,23 @@ module Mongoid
         self.inheritable_fields += fields
 
         fields.each do |field|
-          class_eval <<-RUBY
-            def #{field}_inherited?
-              attribute_inherited?(:#{field})
-            end
-          RUBY
+          [self, *descendants].each do |klass|
+            klass.class_eval <<-RUBY
+              def #{field}_inherited?
+                attribute_inherited?(:#{field})
+              end
+            RUBY
+          end
         end
       end
 
       def reset_inheritance
         inheritable_fields.each do |field|
-          remove_method(:"#{field}_inherited?")
+          [self, *descendants].each do |klass|
+            if klass.instance_methods.include?(:"#{field}_inherited?")
+              klass.send(:remove_method, :"#{field}_inherited?")
+            end
+          end
         end
         inheritable_fields.clear
       end

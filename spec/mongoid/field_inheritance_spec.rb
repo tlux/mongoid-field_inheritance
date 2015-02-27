@@ -78,5 +78,11 @@ describe Mongoid::FieldInheritance do
         .from(true).to(false)
       )
     end
+
+    it 'does not remove dynamic methods from parent' do
+      expect { Cellphone.reset_inheritance }.not_to(
+        change { Product.instance_methods.include?(:name_inherited?) }
+      )
+    end
   end
 end
