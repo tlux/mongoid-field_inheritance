@@ -8,3 +8,6 @@ class Product
 
   embeds_many :custom_properties
 end
+
+class Cellphone < Product
+end
