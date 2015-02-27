@@ -17,25 +17,6 @@ describe Mongoid::FieldInheritance do
     end
   end
 
-  describe '.reset_inheritance' do
-    before :each do
-      Product.inherits :name, :manufacturer
-    end
-
-    it 'removes all inheritable fields' do
-      expect { Product.reset_inheritance }.to(
-        change { Product.inheritable_fields }.from(%w(name manufacturer)).to([])
-      )
-    end
-
-    it 'removes all dynamic methods' do
-      expect { Product.reset_inheritance }.to(
-        change { Product.instance_methods.include?(:name_inherited?) }
-        .from(true).to(false)
-      )
-    end
-  end
-
   describe '.inheritable_fields' do
     before :each do
       Product.inherits :name, :manufacturer
@@ -56,35 +37,46 @@ describe Mongoid::FieldInheritance do
   end
 
   describe '.inherits' do
-    subject do
-      create_model do
-        field :name, localize: true
-        field :manufacturer
-        field :sku, type: Integer
-      end
-    end
-
     it 'raises when no fields have been specified' do
-      expect { subject.inherits }.to raise_error(
+      expect { Product.inherits }.to raise_error(
         ArgumentError, 'No inheritable fields defined'
       )
     end
 
     it 'raises when an invalid field has been specified' do
-      expect { subject.inherits :manufacturer, :_id }.to raise_error(
+      expect { Product.inherits :manufacturer, :_id }.to raise_error(
         ArgumentError, 'Cannot inherit fields: ' +
                        Mongoid::FieldInheritance::INVALID_FIELDS.join(', ')
       )
     end
 
     it 'allows defining inheritable fields as arguments' do
-      subject.inherits :manufacturer, :name
-      expect(subject.inheritable_fields).to match_array %w(manufacturer name)
+      Product.inherits :manufacturer, :name
+      expect(Product.inheritable_fields).to match_array %w(manufacturer name)
     end
 
     it 'allows defining inheritable fields as Array' do
-      subject.inherits [:manufacturer, :name]
-      expect(subject.inheritable_fields).to match_array %w(manufacturer name)
+      Product.inherits [:manufacturer, :name]
+      expect(Product.inheritable_fields).to match_array %w(manufacturer name)
+    end
+  end
+
+  describe '.reset_inheritance' do
+    before :each do
+      Product.inherits :name, :manufacturer
+    end
+
+    it 'removes all inheritable fields' do
+      expect { Product.reset_inheritance }.to(
+        change { Product.inheritable_fields }.from(%w(name manufacturer)).to([])
+      )
+    end
+
+    it 'removes all dynamic methods' do
+      expect { Product.reset_inheritance }.to(
+        change { Product.instance_methods.include?(:name_inherited?) }
+        .from(true).to(false)
+      )
     end
   end
 end
