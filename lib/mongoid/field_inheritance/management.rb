@@ -56,7 +56,7 @@ module Mongoid
           !f.in?(self.class.inheritable_fields)
         end
         return fields unless invalid_field
-        fail ArgumentError, "#{invalid_field} is not inheritable"
+        fail ArgumentError, "Field is not inheritable: #{invalid_field}"
       end
 
       def extract_inherited_fields_from_options(options)

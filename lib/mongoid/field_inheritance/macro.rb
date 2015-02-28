@@ -37,9 +37,9 @@ module Mongoid
       def inherits(*fields)
         fields = Mongoid::FieldInheritance.sanitize_field_names(fields)
         fail ArgumentError, 'No inheritable fields defined' if fields.empty?
-        if fields.any? { |f| f.in?(INVALID_FIELDS) }
-          fail ArgumentError, 'Cannot inherit fields: ' +
-            INVALID_FIELDS.join(', ')
+        invalid_field = fields.detect { |f| f.in?(INVALID_FIELDS) }
+        if invalid_field
+          fail ArgumentError, "Field may not be inherited: #{invalid_field}"
         end
 
         self.inheritable_fields += fields

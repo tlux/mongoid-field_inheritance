@@ -14,8 +14,7 @@ describe Mongoid::FieldInheritance::Macro do
 
     it 'raises when an invalid field has been specified' do
       expect { Product.inherits :manufacturer, :_id }.to raise_error(
-        ArgumentError, 'Cannot inherit fields: ' +
-                       Mongoid::FieldInheritance::INVALID_FIELDS.join(', ')
+        ArgumentError, 'Field may not be inherited: _id'
       )
     end
 
