@@ -17,6 +17,7 @@ module Mongoid
     included do
       include Mongoid::Tree
       extend Macro
+      include Propagation
       include DependencyDestruction
 
       class_attribute :inheritable_fields, instance_accessor: false,
@@ -25,35 +26,9 @@ module Mongoid
 
       field :inherited_fields, type: Array, default: []
 
-      before_validation :clear_inherited_fields,
-                        if: [:root?, :parent_id_changed?]
-      before_save :inherit_fields_from_parent, if: :parent?
-      after_update :update_inherited_fields_in_children, if: :changed?
-
-      validate :verify_inherited_fields_are_empty_for_root, if: :root?
+      validate :verify_inherited_fields_are_empty, if: :root?
       validate :verify_inherited_fields_are_inheritable_fields,
                if: :inherited_fields_changed?
-    end
-
-    protected
-
-    ##
-    # A method responsible for copying data from a source document to the
-    # inherited fields of a destination document.
-    #
-    # @param [Mongoid::FieldInheritance] source The object from which fields
-    #   will be copied.
-    #
-    # @param [Mongoid::FieldInheritance] destination The object to which the
-    #   field will be copied.
-    def copy_fields_for_inheritance(source, destination)
-      fields = destination.inherited_fields
-      localized_fields.each_key do |localized_field|
-        if fields.delete(localized_field)
-          fields << "#{localized_field}_translations"
-        end
-      end
-      destination.attributes = source.send(:clone_document).slice(*fields)
     end
 
     private
@@ -65,27 +40,13 @@ module Mongoid
       true
     end
 
-    def verify_inherited_fields_are_empty_for_root
-      errors.add :inherited_fields, :unavailable if inherited_fields.any?
-    end
-
-    def clear_inherited_fields
-      self.inherited_fields = []
-    end
-
-    def inherit_fields_from_parent
-      copy_fields_for_inheritance(parent, self)
-    end
-
-    def update_inherited_fields_in_children
-      children.each do |child|
-        copy_fields_for_inheritance(self, child)
-        child.save!(validate: false)
-      end
-      true
+    def verify_inherited_fields_are_empty
+      return true if inherited_fields.empty?
+      errors.add :inherited_fields, :unavailable
     end
   end
 end
 
 require 'mongoid/field_inheritance/macro'
+require 'mongoid/field_inheritance/propagation'
 require 'mongoid/field_inheritance/dependency_destruction'
