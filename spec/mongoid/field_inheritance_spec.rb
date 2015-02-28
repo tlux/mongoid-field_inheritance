@@ -36,53 +36,110 @@ describe Mongoid::FieldInheritance do
     end
   end
 
-  describe '.inherits' do
-    it 'raises when no fields have been specified' do
-      expect { Product.inherits }.to raise_error(
-        ArgumentError, 'No inheritable fields defined'
-      )
-    end
-
-    it 'raises when an invalid field has been specified' do
-      expect { Product.inherits :manufacturer, :_id }.to raise_error(
-        ArgumentError, 'Cannot inherit fields: ' +
-                       Mongoid::FieldInheritance::INVALID_FIELDS.join(', ')
-      )
-    end
-
-    it 'allows defining inheritable fields as arguments' do
-      Product.inherits :manufacturer, :name
-      expect(Product.inheritable_fields).to match_array %w(manufacturer name)
-    end
-
-    it 'allows defining inheritable fields as Array' do
-      Product.inherits [:manufacturer, :name]
-      expect(Product.inheritable_fields).to match_array %w(manufacturer name)
-    end
-  end
-
-  describe '.reset_inheritance' do
+  describe '#valid?' do
     before :each do
       Product.inherits :name, :manufacturer
     end
 
-    it 'removes all inheritable fields' do
-      expect { Product.reset_inheritance }.to(
-        change { Product.inheritable_fields }.from(%w(name manufacturer)).to([])
-      )
+    subject { Product.new }
+
+    before :each do
+      allow(subject).to receive(:root?).and_return false
+      subject.inherited_fields = %w(manufacturer)
     end
 
-    it 'removes all dynamic methods' do
-      expect { Product.reset_inheritance }.to(
-        change { Product.instance_methods.include?(:name_inherited?) }
-        .from(true).to(false)
-      )
+    it 'adds an error when inherited fields are set to a ' \
+       'non-inheritable field' do
+      subject.inherited_fields << 'sku'
+      expect(subject.valid?).to be false
+      expect(subject.errors[:inherited_fields].count).to eq 1
     end
 
-    it 'does not remove dynamic methods from parent' do
-      expect { Cellphone.reset_inheritance }.not_to(
-        change { Product.instance_methods.include?(:name_inherited?) }
-      )
+    it 'adds no error when inherited fields are set to an inheritable field' do
+      expect(subject.valid?).to be true
+      expect(subject.errors[:inherited_fields].count).to eq 0
+    end
+
+    it 'adds an error when inherited fields are present on a root record' do
+      allow(subject).to receive(:root?).and_return true
+      expect(subject.valid?).to be false
+      expect(subject.errors[:inherited_fields].count).to eq 1
+    end
+
+    it 'adds no error when inherited fields are present on a nested record' do
+      expect(subject.valid?).to be true
+      expect(subject.errors[:inherited_fields].count).to eq 0
+    end
+  end
+
+  describe '#save' do
+    before :each do
+      Product.inherits :manufacturer, :name
+    end
+
+    context 'with parent' do
+      let! :parent do
+        Product.create! manufacturer: 'Apple', name: 'iPhone', sku: '12345'
+      end
+
+      subject do
+        child = parent.children.new
+        child.inherit_all
+        child.name = 'iPod'
+        child.tap(&:save!)
+      end
+
+      it 'copies the inheritable fields from parent' do
+        expect(subject.manufacturer).to eq 'Apple'
+      end
+
+      it 'overwrites child-defined value if field is among inherited fields' do
+        expect(subject.name).to eq 'iPhone'
+      end
+
+      it 'does not copy the uninheritable fields from parent' do
+        expect(subject.sku).to be nil
+      end
+    end
+
+    context 'with children' do
+      subject { Product.create! manufacturer: 'Apple', name: 'iPhone' }
+
+      let! :child do
+        subject.children.create! do |child|
+          child.inherit :manufacturer
+        end
+      end
+
+      let! :grandchild do
+        child.children.create! do |grandchild|
+          grandchild.inherit :manufacturer
+        end
+      end
+
+      it 'propagates to inherited attribute in child' do
+        expect { subject.update(manufacturer: 'Samsung') }.to change {
+          child.reload.manufacturer
+        }.from('Apple').to('Samsung')
+      end
+
+      it 'propagates to inherited attribute in grandchild' do
+        expect { subject.update(manufacturer: 'HTC') }.to change {
+          grandchild.reload.manufacturer
+        }.from('Apple').to('HTC')
+      end
+
+      it 'does not update inheriting child if nothing has changed' do
+        expect { subject.update(name: 'iPhone') }.not_to change {
+          child.reload.updated_at
+        }
+      end
+
+      it 'does not propagate to non-inherited attributes of children' do
+        expect { subject.update(name: 'One') }.not_to change {
+          child.reload.name
+        }
+      end
     end
   end
 end
