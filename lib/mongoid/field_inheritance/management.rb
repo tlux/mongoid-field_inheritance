@@ -38,7 +38,6 @@ module Mongoid
       def override(options = {})
         self.inherited_fields = self.class.inheritable_fields -
           extract_inherited_fields_from_options(options)
-        mark_overridden(options)
         inherited_fields
       end
 
