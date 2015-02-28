@@ -35,7 +35,7 @@ module Mongoid
       #     inherits :manufacturer, :name
       #   end
       def inherits(*fields)
-        fields = fields.flatten.map(&:to_s)
+        fields = Mongoid::FieldInheritance.sanitize_field_names(fields)
         fail ArgumentError, 'No inheritable fields defined' if fields.empty?
         if fields.any? { |f| f.in?(INVALID_FIELDS) }
           fail ArgumentError, 'Cannot inherit fields: ' +

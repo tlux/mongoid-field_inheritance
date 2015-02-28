@@ -19,6 +19,7 @@ module Mongoid
       extend Macro
       include Propagation
       include DependencyDestruction
+      include Management
 
       class_attribute :inheritable_fields, instance_accessor: false,
                                            instance_predicate: false
@@ -29,6 +30,14 @@ module Mongoid
       validate :verify_inherited_fields_are_empty, if: :root?
       validate :verify_inherited_fields_are_inheritable_fields,
                if: :inherited_fields_changed?
+    end
+
+    def self.sanitize_field_names(fields)
+      Array(fields).flatten.map(&:to_s)
+    end
+
+    def attribute_inherited?(field)
+      inherited_fields.include?(field.to_s)
     end
 
     private
@@ -50,3 +59,4 @@ end
 require 'mongoid/field_inheritance/macro'
 require 'mongoid/field_inheritance/propagation'
 require 'mongoid/field_inheritance/dependency_destruction'
+require 'mongoid/field_inheritance/management'

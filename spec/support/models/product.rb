@@ -1,6 +1,7 @@
 class Product
   include Mongoid::Document
   include Mongoid::FieldInheritance
+  include Mongoid::Timestamps::Updated
 
   field :manufacturer
   field :name, localize: true
