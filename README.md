@@ -2,6 +2,10 @@
 
 Document-based inheritance for Mongoid.
 
+### Installation
+
+TBD
+
 ### Contributing to mongoid-field_inheritance
 
 * Check out the latest master to make sure the feature hasn't been implemented

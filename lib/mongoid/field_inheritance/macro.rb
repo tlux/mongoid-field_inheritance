@@ -5,86 +5,54 @@ module Mongoid
     #
     # @since 0.1.0
     module Macro
-      ##
-      # Defines the fields that should be recognized as inheritable to
-      # the children of a document. Adds the all fields to the
-      # inheritable_fields class attribute and creates #field_inherited?
-      # instance methods if valid.
-      #
-      # @param [Array<String, Symbol>] fields Fields in the current class that
-      #   will be marked inheritable, either specified as a list of arguments
-      #   or an Array of Strings or Symbols.
-      #
-      # @return [Array<String>] All fields of the current class and ancestors
-      #   that are marked inheritable.
-      #
-      # @raise [ArgumentError] Will raise if no fields have been specified or
-      #   any of the given fields is invalid (_id, _type, created_at,
-      #   updated_at, c_at, or u_at).
-      #
-      # @example
-      #   class Product
-      #     include Mongoid::Document
-      #     include Mongoid::FieldInheritance
-      #
-      #     field :manufacturer
-      #     field :name
-      #
-      #     self.delete_descendants = true
-      #
-      #     inherits :manufacturer, :name
-      #   end
-      def inherits(*fields)
-        fields = Mongoid::FieldInheritance.sanitize_field_names(fields)
-        fail ArgumentError, 'No inheritable fields defined' if fields.empty?
-        invalid_field = fields.detect do |f|
-          f.in?(Mongoid::FieldInheritance::INVALID_FIELDS)
-        end
-        if invalid_field
-          fail ArgumentError, "Field may not be inherited: #{invalid_field}"
-        end
+      extend ActiveSupport::Concern
 
-        self.inheritable_fields += fields
+      included do
+        class_attribute :inheritable_fields, :inheritance_options
+        self.inheritable_fields = {}
+        self.inheritance_options = { dependent: :destroy }
 
-        with_inheritable_fields_in_current_and_inheriting_classes do |field|
-          define_method :"#{field}_inherited?" do
-            attribute_inherited?(field)
-          end
+        class << self
+          alias_method_chain :create_accessors, :inheritance
         end
-
-        inheritable_fields
       end
 
-      ##
-      # Removes all fields from the inheritable fields.
-      #
-      # @example
-      #   class Product
-      #     include Mongoid::Document
-      #     include Mongoid::FieldInheritance
-      #
-      #     field :name
-      #     inherits :name
-      #   end
-      #
-      #   class Device < Product
-      #     reset_inheritance
-      #   end
-      def reset_inheritance
-        with_inheritable_fields_in_current_and_inheriting_classes do |field|
-          if instance_methods.include?(:"#{field}_inherited?")
-            remove_method(:"#{field}_inherited?")
-          end
+      module ClassMethods
+        ##
+        # Allows defining options for inheritance.
+        #
+        # @options options [Hash] :dependent Controls what to do with child
+        #   documents when destroying the parent. Possible values are :delete
+        #   and :destroy. When nothing is defined the options defaults to
+        #   :destroy.
+        #
+        # @example
+        #   class Product
+        #     include Mongoid::Document
+        #     include Mongoid::FieldInheritance
+        #
+        #     inheritable dependent: :delete_all
+        #
+        #     field :manufacturer, inherit: true
+        #     field :name
+        #   end
+        def inheritable(options)
+          options.assert_valid_keys(:dependent)
+          self.inheritance_options = inheritance_options.merge(options)
         end
-        inheritable_fields.clear
-      end
 
-      private
+        protected
 
-      def with_inheritable_fields_in_current_and_inheriting_classes(&block)
-        inheritable_fields.each do |inheritable_field|
-          [self, *descendants].each do |klass|
-            klass.instance_exec(inheritable_field, &block)
+        def create_accessors_with_inheritance(name, meth, options = {})
+          create_accessors_without_inheritance(name, meth, options)
+          create_inherited_check(name) if options[:inherit]
+        end
+
+        def create_inherited_check(name)
+          generated_methods.module_eval do
+            re_define_method "#{name}_inherited?" do
+              attribute_inherited?(name)
+            end
           end
         end
       end

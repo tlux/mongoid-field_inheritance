@@ -11,4 +11,5 @@ class Product
 end
 
 class Cellphone < Product
+  field :storage, type: Integer, inherit: true
 end

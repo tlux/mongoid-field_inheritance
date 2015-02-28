@@ -16,45 +16,29 @@ module Mongoid
 
     included do
       include Mongoid::Tree
-      extend Macro
-      include Propagation
-      include DependencyDestruction
-      include Management
-
-      class_attribute :inheritable_fields, instance_accessor: false,
-                                           instance_predicate: false
-      self.inheritable_fields = []
 
       field :inherited_fields, type: Array, default: []
 
-      validate :verify_inherited_fields_are_empty, if: :root?
-      validate :verify_inherited_fields_are_inheritable_fields,
-               if: :inherited_fields_changed?
+      include Macro
+      include Validation
+      include Propagation
+      include Dependency
+      include Management
 
       before_validation :sanitize_inherited_fields
+
+      alias_method :attribute_inherited?, :field_inherited?
     end
 
     def self.sanitize_field_names(fields)
       Array(fields).flatten.reject(&:blank?).map(&:to_s)
     end
 
-    def attribute_inherited?(field)
+    def field_inherited?(field)
       inherited_fields.include?(field.to_s)
     end
 
     private
-
-    def verify_inherited_fields_are_inheritable_fields
-      if inherited_fields.any? { |f| !f.in?(self.class.inheritable_fields) }
-        errors.add :inherited_fields, :invalid
-      end
-      true
-    end
-
-    def verify_inherited_fields_are_empty
-      return true if inherited_fields.empty?
-      errors.add :inherited_fields, :unavailable
-    end
 
     def sanitize_inherited_fields
       self.inherited_fields =
@@ -63,7 +47,9 @@ module Mongoid
   end
 end
 
+require 'mongoid/field_inheritance/inherit_option'
 require 'mongoid/field_inheritance/macro'
+require 'mongoid/field_inheritance/validation'
 require 'mongoid/field_inheritance/propagation'
-require 'mongoid/field_inheritance/dependency_destruction'
+require 'mongoid/field_inheritance/dependency'
 require 'mongoid/field_inheritance/management'

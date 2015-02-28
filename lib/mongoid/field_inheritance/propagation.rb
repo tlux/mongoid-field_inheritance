@@ -21,10 +21,10 @@ module Mongoid
       # A method responsible for copying data from a source document to the
       # inherited fields of a destination document.
       #
-      # @param [Mongoid::FieldInheritance] source The object from which fields
+      # @param [Mongoid::Document] source The object from which fields
       #   will be copied.
       #
-      # @param [Mongoid::FieldInheritance] destination The object to which the
+      # @param [Mongoid::Document] destination The object to which the
       #   field will be copied.
       def copy_fields_for_inheritance(source, destination)
         fields = destination.inherited_fields
@@ -56,3 +56,5 @@ module Mongoid
     end
   end
 end
+
+require 'mongoid/field_inheritance/propagation/default'
