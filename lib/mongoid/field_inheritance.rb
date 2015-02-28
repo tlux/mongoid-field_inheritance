@@ -30,10 +30,12 @@ module Mongoid
       validate :verify_inherited_fields_are_empty, if: :root?
       validate :verify_inherited_fields_are_inheritable_fields,
                if: :inherited_fields_changed?
+
+      before_validation :sanitize_inherited_fields
     end
 
     def self.sanitize_field_names(fields)
-      Array(fields).flatten.map(&:to_s)
+      Array(fields).flatten.reject(&:blank?).map(&:to_s)
     end
 
     def attribute_inherited?(field)
@@ -52,6 +54,11 @@ module Mongoid
     def verify_inherited_fields_are_empty
       return true if inherited_fields.empty?
       errors.add :inherited_fields, :unavailable
+    end
+
+    def sanitize_inherited_fields
+      self.inherited_fields =
+        Mongoid::FieldInheritance.sanitize_field_names(inherited_fields)
     end
   end
 end
