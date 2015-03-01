@@ -6,21 +6,22 @@ module Mongoid
     #
     # @since 0.1.0
     module Management
+      ##
+      # Marks all or certain fields in the document inherited. No values are
+      # copied from the parent.
+      #
+      # @param [Array<Symbol, String>] fields The fields to be marked inherited.
+      #   If no fields are given, all inheritable fields will be marked
+      #   inherited.
+      # @return [Array<String>] The fields that are marked inherited.
+      # @raise [Mongoid::FieldInheritance::UninheritableError] Raises when a
+      #   given field may not be inherited.
       def mark_inherited(*fields)
         fields = assert_valid_inherited_fields(fields)
         if fields.empty?
-          self.inherited_fields = self.class.inheritable_fields
+          self.inherited_fields = self.class.inheritable_fields.keys
         else
           self.inherited_fields = (inherited_fields + fields).uniq
-        end
-      end
-
-      def mark_overridden(*fields)
-        fields = assert_valid_inherited_fields(fields)
-        if fields.empty?
-          self.inherited_fields = []
-        else
-          self.inherited_fields -= fields
         end
       end
 
@@ -33,6 +34,15 @@ module Mongoid
       def inherit!(options = {})
         inherit(options)
         save!
+      end
+
+      def mark_overridden(*fields)
+        fields = assert_valid_inherited_fields(fields)
+        if fields.empty?
+          self.inherited_fields = []
+        else
+          self.inherited_fields -= fields
+        end
       end
 
       def override(options = {})
@@ -52,11 +62,13 @@ module Mongoid
         if sanitized
           fields = Mongoid::FieldInheritance.sanitize_field_names(fields)
         end
-        invalid_field = fields.detect do |f|
+        invalid_fields = fields.select do |f|
           !f.in?(self.class.inheritable_fields)
         end
-        return fields unless invalid_field
-        fail ArgumentError, "Field is not inheritable: #{invalid_field}"
+        return fields if invalid_fields.empty?
+        fail Mongoid::FieldInheritance::UninheritableError.new(invalid_fields),
+             "Field#{invalid_fields.many? ? 's are' : ' is'} not " \
+             "inheritable: " + invalid_fields.join(', ')
       end
 
       def extract_inherited_fields_from_options(options)

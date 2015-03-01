@@ -1,7 +1,7 @@
 require 'spec_helper'
 
 describe Mongoid::FieldInheritance::Macro do
-  subject :model do
+  let! :model do
     ModelFactory.create_model
   end
 
@@ -41,8 +41,9 @@ describe Mongoid::FieldInheritance::Macro do
 
       %w(_id _type created_at updated_at c_at u_at).each do |field|
         it "raises when the field name is #{field}" do
-          expect { model.field :updated_at, inherit: true }.to(
-            raise_error ArgumentError, 'Field cannot be inherited: updated_at'
+          expect { model.field field.to_sym, inherit: true }.to(
+            raise_error Mongoid::FieldInheritance::UninheritableError,
+                        "Field is not inheritable: #{field}"
           )
         end
       end
