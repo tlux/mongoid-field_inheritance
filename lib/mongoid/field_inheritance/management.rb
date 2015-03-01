@@ -91,7 +91,7 @@ module Mongoid
       #   given ones.
       # @return [Array<String>] The fields that are marked inherited.
       def override(options = {})
-        self.inherited_fields = self.class.inheritable_fields -
+        self.inherited_fields = self.class.inheritable_fields.keys -
           extract_inherited_fields_from_options(options)
         inherited_fields
       end
@@ -113,7 +113,7 @@ module Mongoid
 
       def assert_valid_inherited_fields(fields)
         invalid_fields = fields.select do |f|
-          !f.in?(self.class.inheritable_fields)
+          !f.in?(self.class.inheritable_fields.keys)
         end
         return fields if invalid_fields.empty?
         fail UninheritableError.new(self, invalid_fields),
@@ -128,10 +128,10 @@ module Mongoid
         elsif options[:only]
           Mongoid::FieldInheritance.sanitize_field_names(options[:only])
         elsif options[:except]
-          self.class.inheritable_fields -
+          self.class.inheritable_fields.keys -
           Mongoid::FieldInheritance.sanitize_field_names(options[:except])
         else
-          self.class.inheritable_fields
+          self.class.inheritable_fields.keys
         end
       end
     end

@@ -73,7 +73,49 @@ describe Mongoid::FieldInheritance::Management do
     end
 
     context 'with parent' do
-      # TODO
+      let! :parent do
+        model.create manufacturer: 'Apple', name: 'iPhone', sku: '12345'
+      end
+
+      subject { parent.children.new }
+
+      context 'without options' do
+        it 'adds all inheritable fields to inherited fields' do
+          expect { subject.inherit }.to(
+            change { subject.inherited_fields }
+            .from([]).to(model.inheritable_fields.keys)
+          )
+        end
+      end
+
+      context 'with :only option' do
+        it 'adds the specified fields to inherited fields' do
+          expect { subject.inherit only: :manufacturer }.to(
+            change { subject.inherited_fields }
+            .from([]).to(%w(manufacturer))
+          )
+        end
+      end
+
+      context 'with :except option' do
+        it 'adds all inheritable except the specified fields to inherited ' \
+           'fields' do
+          expect { subject.inherit except: :manufacturer }.to(
+            change { subject.inherited_fields }
+            .from([]).to(%w(name))
+          )
+        end
+      end
+
+      context 'with :only and :except options' do
+        it 'raises' do
+          expect {
+            subject.inherit(only: %w(manufacturer), except: %w(name))
+          }.to raise_error(
+            ArgumentError, ':only and :except cannot be specified at once'
+          )
+        end
+      end
     end
   end
 
@@ -89,19 +131,206 @@ describe Mongoid::FieldInheritance::Management do
     end
 
     context 'with parent' do
-      # TODO
+      let! :parent do
+        model.create manufacturer: 'Apple', name: 'iPhone', sku: '12345'
+      end
+
+      subject { parent.children.new }
+
+      it 'saves the document' do
+        expect { subject.inherit! }.to(
+          change { subject.persisted? }.from(false).to(true)
+        )
+      end
+
+      context 'without options' do
+        it 'adds all inheritable fields to inherited fields' do
+          expect { subject.inherit! }.to(
+            change { subject.inherited_fields }
+            .from([]).to(model.inheritable_fields.keys)
+          )
+        end
+      end
+
+      context 'with :only option' do
+        it 'adds the specified fields to inherited fields' do
+          expect { subject.inherit! only: :manufacturer }.to(
+            change { subject.inherited_fields }
+            .from([]).to(%w(manufacturer))
+          )
+        end
+      end
+
+      context 'with :except option' do
+        it 'adds all inheritable except the specified fields to inherited ' \
+           'fields' do
+          expect { subject.inherit! except: :manufacturer }.to(
+            change { subject.inherited_fields }
+            .from([]).to(%w(name))
+          )
+        end
+      end
+
+      context 'with :only and :except options' do
+        it 'raises' do
+          expect {
+            subject.inherit!(only: %w(manufacturer), except: %w(name))
+          }.to raise_error(
+            ArgumentError, ':only and :except cannot be specified at once'
+          )
+        end
+      end
     end
   end
 
   describe '#mark_overridden' do
-    # TODO
+    subject do
+      model.create manufacturer: 'Apple', name: 'iPhone', sku: '12345',
+                   inherited_fields: model.inheritable_fields.keys
+    end
+
+    context 'without fields given' do
+      it 'removes all inherited fields' do
+        expect { subject.mark_overridden }.to(
+          change { subject.inherited_fields }
+          .from(model.inheritable_fields.keys).to([])
+        )
+      end
+    end
+
+    context 'with fields given' do
+      it 'removes the specified fields from inherited fields' do
+        expect { subject.mark_overridden(:name) }.to(
+          change { subject.inherited_fields }
+          .from(model.inheritable_fields.keys).to(%w(manufacturer))
+        )
+      end
+
+      it 'is not whiny when a field does not exist' do
+        expect { subject.mark_overridden(:test) }.not_to raise_error
+      end
+
+      it 'is not whiny when a field is not inheritable' do
+        expect { subject.mark_overridden(:sku, :test) }.not_to raise_error
+      end
+    end
   end
 
   describe '#override' do
-    # TODO
+    context 'without parent' do
+      subject { model.new }
+
+      it 'does not raise when model has no parent' do
+        expect { subject.override }.not_to raise_error
+      end
+    end
+
+    context 'with parent' do
+      let! :parent do
+        model.create manufacturer: 'Apple', name: 'iPhone', sku: '12345'
+      end
+
+      subject { parent.children.new(inherited_fields: %w(name manufacturer)) }
+
+      context 'without options' do
+        it 'removes all inherited fields' do
+          expect { subject.override }.to(
+            change { subject.inherited_fields }
+            .from(%w(name manufacturer)).to([])
+          )
+        end
+      end
+
+      context 'with :only option' do
+        it 'removes the specified fields from inherited fields' do
+          expect { subject.override only: :manufacturer }.to(
+            change { subject.inherited_fields }
+            .from(%w(name manufacturer)).to(%w(name))
+          )
+        end
+      end
+
+      context 'with :except option' do
+        it 'removes all fields except the specified fields from inherited ' \
+           'fields' do
+          expect { subject.override except: :manufacturer }.to(
+            change { subject.inherited_fields }
+            .from(%w(name manufacturer)).to(%w(manufacturer))
+          )
+        end
+      end
+
+      context 'with :only and :except options' do
+        it 'raises' do
+          expect {
+            subject.override(only: %w(manufacturer), except: %w(name))
+          }.to raise_error(
+            ArgumentError, ':only and :except cannot be specified at once'
+          )
+        end
+      end
+    end
   end
 
   describe '#override!' do
-    # TODO
+    context 'without parent' do
+      subject { model.new }
+
+      it 'does not raise when model has no parent' do
+        expect { subject.override }.not_to raise_error
+      end
+    end
+
+    context 'with parent' do
+      let! :parent do
+        model.create manufacturer: 'Apple', name: 'iPhone', sku: '12345'
+      end
+
+      subject { parent.children.new(inherited_fields: %w(name manufacturer)) }
+
+      it 'saves the document' do
+        expect { subject.override! }.to(
+          change { subject.persisted? }.from(false).to(true)
+        )
+      end
+
+      context 'without options' do
+        it 'removes all inherited fields' do
+          expect { subject.override! }.to(
+            change { subject.inherited_fields }
+            .from(%w(name manufacturer)).to([])
+          )
+        end
+      end
+
+      context 'with :only option' do
+        it 'removes the specified fields from inherited fields' do
+          expect { subject.override! only: :manufacturer }.to(
+            change { subject.inherited_fields }
+            .from(%w(name manufacturer)).to(%w(name))
+          )
+        end
+      end
+
+      context 'with :except option' do
+        it 'removes all fields except the specified fields from inherited ' \
+           'fields' do
+          expect { subject.override! except: :manufacturer }.to(
+            change { subject.inherited_fields }
+            .from(%w(name manufacturer)).to(%w(manufacturer))
+          )
+        end
+      end
+
+      context 'with :only and :except options' do
+        it 'raises' do
+          expect {
+            subject.override!(only: %w(manufacturer), except: %w(name))
+          }.to raise_error(
+            ArgumentError, ':only and :except cannot be specified at once'
+          )
+        end
+      end
+    end
   end
 end
