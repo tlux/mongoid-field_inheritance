@@ -23,8 +23,7 @@ module Mongoid
         #
         # @option options [Symbol] :dependent Controls what to do with child
         #   documents when destroying the parent. Possible values are :delete
-        #   and :destroy. When nothing is defined the options defaults to
-        #   :destroy.
+        #   and :destroy. Defaults to :destroy when nothing is defined.
         # @return [Hash] The inheritance options.
         #
         # @example
