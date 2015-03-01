@@ -1,27 +1,46 @@
 module Mongoid
   module FieldInheritance
     module Propagation
+      ##
+      # A class that provides basic functionality to copy attributes from a
+      # source document to a destination.
+      #
+      # @since 0.1.0
       class Default
-        attr_reader :model, :source, :destination
+        attr_reader :field, :source, :destination
 
-        def initialize(model, source, destination)
-          @model = model
+        ##
+        # A method responsible for copying data from a source document to the
+        # inherited fields of a destination document.
+        #
+        # @param [Class] model The model which supports field inheritance.
+        # @param [Mongoid::Document] source The object from which fields
+        #   will be copied.
+        # @param [Mongoid::Document] destination The object to which the
+        #   field will be copied.
+        def initialize(field, source, destination)
+          @field = field
           @source = source
           @destination = destination
         end
 
-        def self.call(model, source, destination)
-          new(model, source, destination).call
+        # This method will initialize a new instance of the current class,
+        # forward the given parameters to the initializer, and invoke the
+        # #call method.
+        def self.call(field, source, destination)
+          new(field, source, destination).call
         end
 
+        ##
+        # This method is responsible for copying data from the source to the
+        # inherited fields of a destination document.
         def call
-          fields = destination.inherited_fields
-          model.localized_fields.each_key do |localized_field|
-            if fields.delete(localized_field)
-              fields << "#{localized_field}_translations"
-            end
+          if field.localized?
+            destination["#{field.name}_translations"] =
+              source["#{field.name}_translations"].deep_dup
+          else
+            destination[field.name] = source[field.name].deep_dup
           end
-          destination.attributes = source.send(:clone_document).slice(*fields)
         end
       end
     end
