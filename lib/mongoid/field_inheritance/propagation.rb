@@ -58,4 +58,5 @@ module Mongoid
   end
 end
 
+require 'mongoid/field_inheritance/propagation/base'
 require 'mongoid/field_inheritance/propagation/default'

@@ -33,11 +33,10 @@ module Mongoid
         # This method is responsible for perfoming an actual action on the
         # descendant documents.
         #
-        # @return [void]
+        # @raise [NotImplementedError] Method must be implemented by subclasses.
         def call
-          fail NotImplementedError, 'Dependency handler did not define what ' \
-                                    'to do with descendants when destroying ' \
-                                    'document'
+          fail NotImplementedError, 'Dependency strategy does not implement ' \
+                                    'any action'
         end
       end
     end
