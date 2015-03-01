@@ -6,13 +6,15 @@ module Mongoid
     #
     # @since 0.1.0
     class UninheritableError < StandardError
-      attr_reader :fields
+      attr_reader :model, :fields
 
       ##
       # Initializes the exception.
       #
+      # @param [Class] model The model.
       # @param [Array<String>] fields The invalid fields.
-      def initialize(*fields)
+      def initialize(model, *fields)
+        @model = model
         @fields = fields.flatten
       end
     end
