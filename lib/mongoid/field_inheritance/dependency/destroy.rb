@@ -7,6 +7,11 @@ module Mongoid
       #
       # @since 0.1.0
       class Destroy < Base
+        ##
+        # This method destroys all children (recursively), invoking callbacks
+        # on the particular documents.
+        #
+        # @return [void]
         def call
           document.children.destroy_all
         end

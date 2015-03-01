@@ -21,7 +21,7 @@ describe Mongoid::FieldInheritance do
     end
   end
 
-  describe '#attribute_inherited?' do
+  describe '#field_inherited?' do
     subject { model.new }
 
     before :each do
@@ -30,21 +30,21 @@ describe Mongoid::FieldInheritance do
 
     context 'when the attribute is inherited' do
       it 'returns true specifying the field name as Symbol' do
-        expect(subject.attribute_inherited?(:name)).to be true
+        expect(subject.field_inherited?(:name)).to be true
       end
 
       it 'returns true specifying the field name as String' do
-        expect(subject.attribute_inherited?('name')).to be true
+        expect(subject.field_inherited?('name')).to be true
       end
     end
 
     context 'when the attribute is not inherited' do
       it 'returns false specifying the field name as Symbol' do
-        expect(subject.attribute_inherited?(:manufacturer)).to be false
+        expect(subject.field_inherited?(:manufacturer)).to be false
       end
 
       it 'returns false specifying the field name as String' do
-        expect(subject.attribute_inherited?('manufacturer')).to be false
+        expect(subject.field_inherited?('manufacturer')).to be false
       end
     end
 

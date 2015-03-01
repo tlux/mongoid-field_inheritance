@@ -7,6 +7,11 @@ module Mongoid
       #
       # @since 0.1.0
       class Delete < Base
+        ##
+        # This method actually deletes all descendants, without invoking any
+        # callbacks on the particular documents.
+        #
+        # @return [void]
         def call
           document.descendants.delete_all
         end

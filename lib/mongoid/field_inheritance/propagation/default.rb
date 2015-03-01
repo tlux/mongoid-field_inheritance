@@ -10,10 +10,9 @@ module Mongoid
         attr_reader :field, :source, :destination
 
         ##
-        # A method responsible for copying data from a source document to the
-        # inherited fields of a destination document.
+        # Initializes the propagation strategy class.
         #
-        # @param [Class] model The model which supports field inheritance.
+        # @param [Mongoid::Fields::Standard] field The field to be copied.
         # @param [Mongoid::Document] source The object from which fields
         #   will be copied.
         # @param [Mongoid::Document] destination The object to which the
@@ -27,6 +26,14 @@ module Mongoid
         # This method will initialize a new instance of the current class,
         # forward the given parameters to the initializer, and invoke the
         # #call method.
+        #
+        # @param [Mongoid::Fields::Standard] field The field to be copied.
+        # @param [Mongoid::Document] source The object from which fields
+        #   will be copied.
+        # @param [Mongoid::Document] destination The object to which the
+        #   field will be copied.
+        #
+        # @return [void]
         def self.call(field, source, destination)
           new(field, source, destination).call
         end
@@ -34,6 +41,8 @@ module Mongoid
         ##
         # This method is responsible for copying data from the source to the
         # inherited fields of a destination document.
+        #
+        # @return [void]
         def call
           if field.localized?
             destination["#{field.name}_translations"] =

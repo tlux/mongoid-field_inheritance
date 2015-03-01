@@ -25,6 +25,7 @@ module Mongoid
         #   documents when destroying the parent. Possible values are :delete
         #   and :destroy. When nothing is defined the options defaults to
         #   :destroy.
+        # @return [Hash] The inheritance options.
         #
         # @example
         #   class Product

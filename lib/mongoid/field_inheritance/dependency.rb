@@ -23,6 +23,8 @@ module Mongoid
       ##
       # A hook that is responsible for removing documents that are inheriting
       # from the current one.
+      #
+      # @return [void]
       def handle_inheriting_documents_on_destroy
         strategy_name = self.class.inheritance_options[:dependent]
         strategy_name = STRATEGY_ALIASES.fetch(strategy_name, strategy_name)

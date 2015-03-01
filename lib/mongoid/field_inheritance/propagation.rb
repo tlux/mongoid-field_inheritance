@@ -22,9 +22,9 @@ module Mongoid
         #
         # @param [Mongoid::Document] source The object from which fields
         #   will be copied.
-        #
         # @param [Mongoid::Document] destination The object to which the
         #   field will be copied.
+        # @return [void]
         def copy_fields_for_inheritance(source, destination)
           inheritable_fields.each_value do |field|
             next unless destination.inherited_fields.include?(field.name)

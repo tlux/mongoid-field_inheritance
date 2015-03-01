@@ -8,22 +8,37 @@ module Mongoid
       extend ActiveSupport::Concern
 
       included do
-        validate :verify_inherited_fields_are_empty, if: :root?
+        validate :verify_inherited_fields_are_empty
         validate :verify_inherited_fields_are_inheritable_fields,
                  if: :inherited_fields_changed?
       end
 
       private
 
+      ##
+      # Validates whether all fields in inherited_fields match the fields
+      # permited through inheritable_fields. Adds an error to the document
+      # otherwise.
+      #
+      # @return [void]
       def verify_inherited_fields_are_inheritable_fields
-        if inherited_fields.any? { |f| !f.in?(self.class.inheritable_fields) }
-          errors.add :inherited_fields, :invalid
+        invalid_field = inherited_fields.detect do |f|
+          !f.in?(self.class.inheritable_fields)
         end
-        true
+        return unless invalid_field
+        errors.add :inherited_fields, :invalid,
+                   field: invalid_field,
+                   name: self.class.human_attribute_name(invalid_field)
       end
 
+      ##
+      # Validates whether no inherited_fields have been set. This is relevant
+      # when the document is on the root of the hierarchy. Adds an error to the
+      # document if inherited_fields exist.
+      #
+      # @return [void]
       def verify_inherited_fields_are_empty
-        return true if inherited_fields.empty?
+        return if !root? || inherited_fields.empty?
         errors.add :inherited_fields, :unavailable
       end
     end
