@@ -21,7 +21,7 @@ module Mongoid
         ##
         # Allows defining options for inheritance.
         #
-        # @options options [Hash] :dependent Controls what to do with child
+        # @option options [Hash] :dependent Controls what to do with child
         #   documents when destroying the parent. Possible values are :delete
         #   and :destroy. When nothing is defined the options defaults to
         #   :destroy.
