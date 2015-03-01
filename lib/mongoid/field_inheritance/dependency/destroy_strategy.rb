@@ -6,7 +6,7 @@ module Mongoid
       # invocation of callbacks in all descending documents.
       #
       # @since 0.1.0
-      class Destroy < Base
+      class DestroyStrategy < Base
         ##
         # This method destroys all children (recursively), invoking callbacks
         # on the particular documents.

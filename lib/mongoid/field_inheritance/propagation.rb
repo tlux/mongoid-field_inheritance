@@ -31,7 +31,7 @@ module Mongoid
             strategy_name = field.options[:inherit]
             next unless strategy_name
             strategy_name = :default if strategy_name == true
-            strategy_class = const_get(strategy_name.to_s.classify)
+            strategy_class = const_get("#{strategy_name.to_s.classify}Strategy")
             strategy_class.call(field, source, destination)
           end
         end
@@ -59,4 +59,4 @@ module Mongoid
 end
 
 require 'mongoid/field_inheritance/propagation/base'
-require 'mongoid/field_inheritance/propagation/default'
+require 'mongoid/field_inheritance/propagation/default_strategy'

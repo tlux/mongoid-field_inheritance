@@ -28,7 +28,7 @@ module Mongoid
       def handle_inheriting_documents_on_destroy
         strategy_name = self.class.inheritance_options[:dependent]
         strategy_name = STRATEGY_ALIASES.fetch(strategy_name, strategy_name)
-        strategy_type = strategy_name.to_s.classify
+        strategy_type = "#{strategy_name.to_s.classify}Strategy"
         unless self.class.const_defined?(strategy_type)
           fail ArgumentError, "Unknown dependency handling: #{strategy_name}"
         end
@@ -39,5 +39,5 @@ module Mongoid
 end
 
 require 'mongoid/field_inheritance/dependency/base'
-require 'mongoid/field_inheritance/dependency/delete'
-require 'mongoid/field_inheritance/dependency/destroy'
+require 'mongoid/field_inheritance/dependency/delete_strategy'
+require 'mongoid/field_inheritance/dependency/destroy_strategy'

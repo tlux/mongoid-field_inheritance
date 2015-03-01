@@ -6,7 +6,7 @@ module Mongoid
       # source document to a destination.
       #
       # @since 0.1.0
-      class Default < Base
+      class DefaultStrategy < Base
         ##
         # This method is responsible for copying data from the source to the
         # inherited fields of a destination document.
