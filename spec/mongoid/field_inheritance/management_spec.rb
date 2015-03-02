@@ -111,6 +111,12 @@ describe Mongoid::FieldInheritance::Management do
             .from([]).to(%w(manufacturer))
           )
         end
+
+        it 'copies field from parent' do
+          expect { subject.inherit }.to(
+            change { subject.manufacturer }.to('Apple')
+          )
+        end
       end
 
       context 'with :except option' do
@@ -119,6 +125,12 @@ describe Mongoid::FieldInheritance::Management do
           expect { subject.inherit except: :manufacturer }.to(
             change { subject.inherited_fields }
             .from([]).to(%w(name))
+          )
+        end
+
+        it 'copies field from parent' do
+          expect { subject.inherit }.to(
+            change { subject.name_translations }.to(parent.name_translations)
           )
         end
       end
