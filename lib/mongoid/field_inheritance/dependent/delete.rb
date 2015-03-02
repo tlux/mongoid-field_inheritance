@@ -1,12 +1,12 @@
 module Mongoid
   module FieldInheritance
-    module Dependency
+    module Dependent
       ##
       # A strategy to delete all descendant document which prevents callbacks
       # from being invoked on the child documents.
       #
       # @since 0.1.0
-      class DeleteStrategy < Base
+      class Delete < Base
         ##
         # This method actually deletes all descendants, without invoking any
         # callbacks on the particular documents.

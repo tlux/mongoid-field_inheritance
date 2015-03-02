@@ -1,6 +1,6 @@
 module Mongoid
   module FieldInheritance
-    module Dependency
+    module Dependent
       ##
       # A class providing an interface for all kinds of dependency handlers.
       #
@@ -35,8 +35,7 @@ module Mongoid
         #
         # @raise [NotImplementedError] Method must be implemented by subclasses.
         def call
-          fail NotImplementedError, 'Dependency strategy does not implement ' \
-                                    'any action'
+          fail NotImplementedError, 'Strategy does not implement anything'
         end
       end
     end

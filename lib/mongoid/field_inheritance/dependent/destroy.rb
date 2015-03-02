@@ -1,12 +1,12 @@
 module Mongoid
   module FieldInheritance
-    module Dependency
+    module Dependent
       ##
       # A strategy to destroy all children of the document which leads to
       # invocation of callbacks in all descending documents.
       #
       # @since 0.1.0
-      class DestroyStrategy < Base
+      class Destroy < Base
         ##
         # This method destroys all children (recursively), invoking callbacks
         # on the particular documents.

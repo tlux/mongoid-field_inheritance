@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe Mongoid::FieldInheritance::Macro do
+describe Mongoid::FieldInheritance::Macros do
   let! :model do
     ModelFactory.create_model
   end

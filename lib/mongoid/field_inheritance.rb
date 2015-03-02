@@ -19,15 +19,14 @@ module Mongoid
 
       field :inherited_fields, type: Array, default: []
 
-      include Macro
+      include Macros
+      include Fields
       include Validation
       include Propagation
-      include Dependency
+      include Dependent
       include Management
 
       before_validation :sanitize_inherited_fields
-
-      alias_method :attribute_inherited?, :field_inherited?
     end
 
     ##
@@ -39,18 +38,6 @@ module Mongoid
     # @return [Array<String>] A list of field names.
     def self.sanitize_field_names(*fields)
       Array(fields).flatten.reject(&:blank?).map(&:to_s)
-    end
-
-    ##
-    # Indicates whether a field is inherited. It actually checks whether a
-    # given field is included in #inherited_fields of the current document.
-    # Aliased as: #attribute_inherited?
-    #
-    # @param [Symbol, String] field The name of the field.
-    # @return [Boolean] Returns true when the field is inherited,
-    #   false otherwise.
-    def field_inherited?(field)
-      inherited_fields.include?(field.to_s)
     end
 
     private
@@ -66,11 +53,11 @@ module Mongoid
   end
 end
 
-require 'mongoid/field_inheritance/inherit_option'
-require 'mongoid/field_inheritance/macro'
+require 'mongoid/field_inheritance/macros'
+require 'mongoid/field_inheritance/fields'
 require 'mongoid/field_inheritance/validation'
 require 'mongoid/field_inheritance/propagation'
-require 'mongoid/field_inheritance/dependency'
+require 'mongoid/field_inheritance/dependent'
 require 'mongoid/field_inheritance/management'
 require 'mongoid/field_inheritance/uninheritable_error'
 require 'mongoid/field_inheritance/undefined_parent_error'

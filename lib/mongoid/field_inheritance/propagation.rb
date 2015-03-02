@@ -28,11 +28,10 @@ module Mongoid
         def copy_fields_for_inheritance(source, destination)
           inheritable_fields.each_value do |field|
             next unless destination.inherited_fields.include?(field.name)
-            strategy_name = field.options[:inherit]
-            next unless strategy_name
-            strategy_name = :default if strategy_name == true
-            strategy_class = const_get("#{strategy_name.to_s.classify}Strategy")
-            strategy_class.call(field, source, destination)
+            propagate = field.options[:inherit]
+            next unless propagate
+            propagate = :default if propagate == true
+            const_get(propagate.to_s.classify).call(field, source, destination)
           end
         end
       end
@@ -59,4 +58,4 @@ module Mongoid
 end
 
 require 'mongoid/field_inheritance/propagation/base'
-require 'mongoid/field_inheritance/propagation/default_strategy'
+require 'mongoid/field_inheritance/propagation/default'

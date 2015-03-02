@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe Mongoid::FieldInheritance::Dependency do
+describe Mongoid::FieldInheritance::Dependent do
   let! :model do
     ModelFactory.create_model do
       field :manufacturer, inherit: true
