@@ -74,7 +74,9 @@ describe Mongoid::FieldInheritance::Management do
 
     context 'with parent' do
       let! :parent do
-        model.create manufacturer: 'Apple', name: 'iPhone', sku: '12345'
+        model.create manufacturer: 'Apple',
+                     name_translations: { en: 'iPhone EN', de: 'iPhone DE' },
+                     sku: '12345'
       end
 
       subject { parent.children.new }
@@ -85,6 +87,20 @@ describe Mongoid::FieldInheritance::Management do
             change { subject.inherited_fields }
             .from([]).to(model.inheritable_fields.keys)
           )
+        end
+
+        it 'copies standard field from parent' do
+          expect { subject.inherit }.to(
+            change { subject.manufacturer }.to('Apple')
+          )
+        end
+
+        it 'copies localized fields in all locales from parent' do
+          subject.inherit
+          expect(subject.name_translations).to eq parent.name_translations
+          I18n.with_locale :en do
+            expect(subject.name).to eq 'iPhone EN'
+          end
         end
       end
 

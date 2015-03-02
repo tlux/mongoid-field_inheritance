@@ -14,8 +14,9 @@ module Mongoid
         # @return [void]
         def call
           if field.localized?
-            destination["#{field.name}_translations"] =
-              source["#{field.name}_translations"].deep_dup
+            translations = source.public_send("#{field.name}_translations")
+                           .deep_dup
+            destination.public_send("#{field.name}_translations=", translations)
           else
             destination[field.name] = source[field.name].deep_dup
           end

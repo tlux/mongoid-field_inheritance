@@ -28,7 +28,8 @@ describe Mongoid::FieldInheritance::Propagation do
           )
         end
 
-        it 'overwrites child-defined value if field is among inherited fields' do
+        it 'overwrites child-defined value if field is among inherited ' \
+           'fields' do
           subject.manufacturer = 'Samsung'
           expect { subject.save }.to(
             change { subject.manufacturer }.from('Samsung').to('Apple')
@@ -110,7 +111,8 @@ describe Mongoid::FieldInheritance::Propagation do
           )
         end
 
-        it 'overwrites child-defined value if field is among inherited fields' do
+        it 'overwrites child-defined value if field is among inherited ' \
+           'fields' do
           subject.manufacturer = 'Samsung'
           expect { subject.save }.to(
             change { subject.manufacturer }.from('Samsung').to('Apple')
@@ -163,6 +165,45 @@ describe Mongoid::FieldInheritance::Propagation do
             child.reload.name
           }
         end
+      end
+    end
+
+    context 'with inherited embedded relation' do
+      let! :embedded_model do
+        ModelFactory.create_model 'Property' do
+          embedded_in :product
+
+          field :key
+          field :value
+        end
+      end
+
+      let! :model do
+        ModelFactory.create_model 'Product' do
+          include Mongoid::Timestamps::Updated
+
+          field :name, inherit: true, localize: true
+          field :manufacturer, inherit: true
+
+          embeds_many :properties
+        end
+      end
+
+      context 'with parent' do
+        let! :parent do
+          model.create manufacturer: 'Apple', name: 'iPhone' do |product|
+            product.properties.build(key: 'storage', value: 16_000)
+            product.properties.build(key: 'color', value: 'red')
+          end
+        end
+
+        subject { parent.children.new.tap(&:inherit) }
+
+        # TODO
+      end
+
+      context 'with children' do
+        # TODO
       end
     end
   end
