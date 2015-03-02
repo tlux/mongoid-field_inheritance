@@ -170,7 +170,7 @@ describe Mongoid::FieldInheritance::Propagation do
 
     context 'with inherited embedded relation' do
       let! :embedded_model do
-        ModelFactory.create_model 'Property' do
+        ModelFactory.create_basic_model 'Property' do
           embedded_in :product
 
           field :key
@@ -199,7 +199,8 @@ describe Mongoid::FieldInheritance::Propagation do
 
         subject { parent.children.new.tap(&:inherit) }
 
-        # TODO
+        # it 'TODO' do
+        # end
       end
 
       context 'with children' do
