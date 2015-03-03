@@ -28,8 +28,12 @@ module Mongoid
         #   field will be copied.
         # @return [void]
         def copy_fields_for_inheritance(source, destination)
-          inheritable_fields.each_value do |field|
-            next unless destination.inherited_fields.include?(field.name)
+          if source.inheritable_fields != destination.inheritable_fields
+            fail ArgumentError, 'Documents are not compatible for inheritance'
+          end
+          destination.inherited_fields.each do |name|
+            field = inheritable_fields[name.to_s]
+            next if field.nil?
             propagate = field.options[:inherit]
             next unless propagate
             propagate = :default if propagate == true

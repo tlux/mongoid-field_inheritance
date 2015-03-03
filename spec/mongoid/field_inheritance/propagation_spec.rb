@@ -44,6 +44,48 @@ describe Mongoid::FieldInheritance::Propagation do
           subject.sku = '12345'
           expect { subject.save }.to_not change { subject.sku }
         end
+
+        context 'when moving subject' do
+          before(:each) { subject.save! }
+
+          let! :new_parent do
+            model.create manufacturer: 'Samsung', name: 'Galaxy S', sku: '23456'
+          end
+
+          context 'to root' do
+            it 'clears inherited fields' do
+              expect { subject.update(parent: nil) }.to(
+                change { subject.inherited_fields }
+                .from(%w(name manufacturer)).to([])
+              )
+            end
+
+            it 'retains the originally inherited values' do
+              subject.update(parent: nil)
+
+              expect(subject.manufacturer).to eq parent.manufacturer
+              expect(subject.name).to eq parent.name
+              expect(subject.sku).to eq nil
+            end
+          end
+
+          context 'to another parent' do
+            it 'does not change inherited fields' do
+              expect { subject.update(parent: new_parent) }.to_not(
+                change { subject.inherited_fields }
+              )
+            end
+
+            it 'replaces values in inherited fields with that from the ' \
+               'new parent' do
+              subject.update(parent: new_parent)
+
+              expect(subject.manufacturer).to eq new_parent.manufacturer
+              expect(subject.name).to eq new_parent.name
+              expect(subject.sku).to eq nil
+            end
+          end
+        end
       end
 
       context 'with children' do
