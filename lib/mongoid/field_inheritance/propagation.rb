@@ -15,6 +15,8 @@ module Mongoid
         after_update :update_inherited_fields_in_children, if: :changed?
       end
 
+      ##
+      # @since 0.1.0
       module ClassMethods
         ##
         # A method responsible for copying data from a source document to the

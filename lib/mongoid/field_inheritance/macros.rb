@@ -13,6 +13,8 @@ module Mongoid
         self.inheritance_options = { dependent: :destroy }
       end
 
+      ##
+      # @since 0.1.0
       module ClassMethods
         ##
         # Allows defining options for inheritance.

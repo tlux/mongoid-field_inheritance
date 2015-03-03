@@ -1,5 +1,10 @@
 module Mongoid
   module FieldInheritance
+    ##
+    # Provides hooks to create inheritance based inquiry methods and all kinds
+    # of other field-related stuff.
+    #
+    # @since 0.1.0
     module Fields
       extend ActiveSupport::Concern
 
@@ -11,6 +16,8 @@ module Mongoid
         end
       end
 
+      ##
+      # @since 0.1.0
       module ClassMethods
         protected
 
@@ -60,9 +67,12 @@ module Mongoid
 end
 
 Mongoid::Fields.option :inherit do |model, field, value|
-  if field.name.in?(Mongoid::FieldInheritance::INVALID_FIELDS)
-    fail Mongoid::FieldInheritance::UninheritableError.new(model, field),
-         "Field is not inheritable: #{field.name}"
+  if value
+    if field.name.in?(Mongoid::FieldInheritance::INVALID_FIELDS)
+      fail Mongoid::FieldInheritance::UninheritableError.new(model, field),
+           "Field is not inheritable: #{field.name}"
+    end
+    model.inheritable_fields =
+      model.inheritable_fields.merge(field.name => field)
   end
-  model.inheritable_fields = model.inheritable_fields.merge(field.name => field)
 end
