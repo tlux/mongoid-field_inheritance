@@ -21,7 +21,7 @@ describe Mongoid::FieldInheritance::Dependent do
 
     context 'with destroy strategy' do
       before :each do
-        model.inheritable dependent: :destroy
+        model.acts_as_inheritable dependent: :destroy
       end
 
       it 'destroys self and descendants' do
@@ -31,7 +31,7 @@ describe Mongoid::FieldInheritance::Dependent do
 
     context 'with destroy_all strategy' do
       before :each do
-        model.inheritable dependent: :destroy_all
+        model.acts_as_inheritable dependent: :destroy_all
       end
 
       it 'destroys self and descendants' do
@@ -41,7 +41,7 @@ describe Mongoid::FieldInheritance::Dependent do
 
     context 'with delete strategy' do
       before :each do
-        model.inheritable dependent: :delete
+        model.acts_as_inheritable dependent: :delete
       end
 
       it 'deletes self and descendants' do
@@ -51,7 +51,7 @@ describe Mongoid::FieldInheritance::Dependent do
 
     context 'with delete_all strategy' do
       before :each do
-        model.inheritable dependent: :delete_all
+        model.acts_as_inheritable dependent: :delete_all
       end
 
       it 'deletes self and descendants' do

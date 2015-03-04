@@ -45,7 +45,7 @@ module Mongoid
       def inherit(options = {})
         fail UndefinedParentError.new(self), 'No parent defined' if root?
         self.inherited_fields = extract_inherited_fields_from_options(options)
-        self.class.copy_fields_for_inheritance(parent, self)
+        inherit_fields_from_parent
         inherited_fields
       end
 

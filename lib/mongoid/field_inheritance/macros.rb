@@ -29,12 +29,12 @@ module Mongoid
         #     include Mongoid::Document
         #     include Mongoid::FieldInheritance
         #
-        #     inheritable dependent: :delete_all
+        #     acts_as_inheritable dependent: :delete_all
         #
         #     field :manufacturer, inherit: true
         #     field :name
         #   end
-        def inheritable(options)
+        def acts_as_inheritable(options = {})
           options.assert_valid_keys(:dependent)
           self.inheritance_options = inheritance_options.merge(options)
         end

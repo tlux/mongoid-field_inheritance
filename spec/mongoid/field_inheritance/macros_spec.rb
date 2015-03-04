@@ -50,16 +50,16 @@ describe Mongoid::FieldInheritance::Macros do
     end
   end
 
-  describe '.inheritable' do
+  describe '.acts_as_inheritable' do
     it 'can set :dependent option' do
-      expect { model.inheritable dependent: :delete_all }.to(
+      expect { model.acts_as_inheritable dependent: :delete_all }.to(
         change { model.inheritance_options[:dependent] }
         .from(:destroy).to(:delete_all)
       )
     end
 
     it 'raises when setting an unknown option' do
-      expect { model.inheritable test: true }.to raise_error(
+      expect { model.acts_as_inheritable test: true }.to raise_error(
         ArgumentError, 'Unknown key: :test. Valid keys are: :dependent'
       )
     end

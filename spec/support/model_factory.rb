@@ -16,17 +16,17 @@ module ModelFactory
     end
     model.name = name
     Object.const_set(name, model)
-    model.instance_exec do
+    model.class_eval do
       include Mongoid::Document
     end
-    model.instance_exec(&block) if block_given?
+    model.class_eval(&block) if block_given?
     model
   end
 
   def create_model(name = 'TempModel', &block)
-    create_basic_model do
+    create_basic_model(name) do
       include Mongoid::FieldInheritance
-      instance_exec(&block) if block_given?
+      class_eval(&block) if block_given?
     end
   end
 end
