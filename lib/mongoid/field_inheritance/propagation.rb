@@ -38,29 +38,9 @@ module Mongoid
               destination.inherited_fields.each do |name|
                 field = inheritable_fields[name.to_s]
                 next if field.nil? || !field.options[:inherit]
-                copy_field_for_inheritance(field, source, destination)
+                Inheritor.call(field, source, destination)
               end
             end
-          end
-        end
-
-        ##
-        # A method responsible for copying a single field from a source document
-        # to a destination document.
-        #
-        # @param [Mongoid::Fields::Standard] field Thee field to be copied.
-        # @param [Mongoid::Document] source The object from which field
-        #   will be copied.
-        # @param [Mongoid::Document] destination The object to which the
-        #   field will be copied.
-        # @return [void]
-        def copy_field_for_inheritance(field, source, destination)
-          if field.localized?
-            translations_attr = "#{field.name}_translations"
-            translations = source.public_send(translations_attr).deep_dup
-            destination.public_send("#{translations_attr}=", translations)
-          else
-            destination[field.name] = source[field.name].deep_dup
           end
         end
       end

@@ -56,6 +56,7 @@ end
 require 'mongoid/field_inheritance/macros'
 require 'mongoid/field_inheritance/fields'
 require 'mongoid/field_inheritance/validation'
+require 'mongoid/field_inheritance/inheritor'
 require 'mongoid/field_inheritance/propagation'
 require 'mongoid/field_inheritance/dependent'
 require 'mongoid/field_inheritance/management'

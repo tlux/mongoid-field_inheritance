@@ -64,4 +64,7 @@ describe Mongoid::FieldInheritance::Macros do
       )
     end
   end
+
+  describe '.inherit' do
+  end
 end

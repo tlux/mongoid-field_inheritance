@@ -2,7 +2,7 @@ require 'spec_helper'
 
 describe Mongoid::FieldInheritance::Propagation do
   describe '#save' do
-    context 'without explicit strategy' do
+    context 'with fields' do
       let! :model do
         ModelFactory.create_model do
           include Mongoid::Timestamps::Updated
@@ -127,7 +127,11 @@ describe Mongoid::FieldInheritance::Propagation do
       end
     end
 
-    context 'when an embedded relation should be inherited' do
+    context 'with custom inheritor' do
+      # TODO
+    end
+
+    context 'with custom inheritor on embedded relations' do
       let! :embedded_model do
         ModelFactory.create_basic_model 'Property' do
           embedded_in :product
@@ -138,44 +142,29 @@ describe Mongoid::FieldInheritance::Propagation do
         end
       end
 
-      context 'with many embedded documents' do
-        let! :model do
-          ModelFactory.create_model 'Product' do
-            include Mongoid::Timestamps::Updated
+      let! :model do
+        ModelFactory.create_model 'Product' do
+          include Mongoid::Timestamps::Updated
 
-            field :name, inherit: true, localize: true
-            field :manufacturer, inherit: true
+          field :name, inherit: true, localize: true
+          field :manufacturer, inherit: true
 
-            embeds_many :properties
-
-            after_inherit :copy_properties
-
-            def copy_properties
-              parent.properties.each do |parent_prop|
-                prop = properties.find_or_initialize_by(key: parent_prop.key)
-                prop.value = parent_prop.value
-              end
-            end
-          end
-        end
-
-        context 'with parent' do
-          let! :parent do
-            model.create manufacturer: 'Apple', name: 'iPhone' do |product|
-              product.properties.build(key: 'storage', value: 16_000)
-              product.properties.build(key: 'color', value: 'red')
-            end
-          end
-
-          subject { parent.children.new }
-        end
-
-        context 'with children' do
-          # TODO
+          embeds_many :properties
         end
       end
 
-      context 'with one embedded document' do
+      context 'with parent' do
+        let! :parent do
+          model.create manufacturer: 'Apple', name: 'iPhone' do |product|
+            product.properties.build(key: 'storage', value: 16_000)
+            product.properties.build(key: 'color', value: 'red')
+          end
+        end
+
+        subject { parent.children.new }
+      end
+
+      context 'with children' do
         # TODO
       end
     end
