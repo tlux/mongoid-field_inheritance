@@ -10,7 +10,7 @@ module Mongoid
       # Marks all or certain fields in the document inherited. No values are
       # copied from the parent.
       #
-      # @param [Array<Symbol, String>] fields The fields to be marked inherited.
+      # @param [Array<Symbol, String>] names The fields to be marked inherited.
       #   All inheritable fields will be marked inherited if no fields are
       #   given.
       # @return [Array<String>] The fields that are marked inherited.
@@ -18,14 +18,14 @@ module Mongoid
       #   the document has no parent.
       # @raise [Mongoid::FieldInheritance::UninheritableError] Raises when a
       #   given field may not be inherited.
-      def mark_inherited(*fields)
+      def mark_inherited(*names)
         fail UndefinedParentError.new(self), 'No parent defined' if root?
-        fields = Mongoid::FieldInheritance.sanitize_field_names(fields)
-        if fields.empty?
+        names = Mongoid::FieldInheritance.sanitize_field_names(names)
+        if names.empty?
           self.inherited_fields = self.class.inheritable_fields.keys
         else
           self.inherited_fields =
-            (inherited_fields + assert_valid_inherited_fields(fields)).uniq
+            (inherited_fields + assert_valid_inherited_fields(names)).uniq
         end
       end
 
@@ -69,16 +69,16 @@ module Mongoid
       ##
       # Marks all or certain fields in the document overridden.
       #
-      # @param [Array<Symbol, String>] fields The fields to be marked
+      # @param [Array<Symbol, String>] names The fields to be marked
       #   overridden. All inheritable fields will be marked overridden if no
       #   fields are given.
       # @return [Array<String>] The fields that are marked inherited.
-      def mark_overridden(*fields)
-        fields = Mongoid::FieldInheritance.sanitize_field_names(fields)
-        if fields.empty?
+      def mark_overridden(*names)
+        names = Mongoid::FieldInheritance.sanitize_field_names(names)
+        if names.empty?
           self.inherited_fields = []
         else
-          self.inherited_fields -= fields
+          self.inherited_fields -= names
         end
       end
 
@@ -111,11 +111,11 @@ module Mongoid
 
       private
 
-      def assert_valid_inherited_fields(fields)
-        invalid_fields = fields.select do |f|
+      def assert_valid_inherited_fields(names)
+        invalid_fields = names.select do |f|
           !f.in?(self.class.inheritable_fields.keys)
         end
-        return fields if invalid_fields.empty?
+        return names if invalid_fields.empty?
         fail UninheritableError.new(self, invalid_fields),
              "Field#{invalid_fields.many? ? 's are' : ' is'} not " \
              "inheritable: " + invalid_fields.join(', ')
