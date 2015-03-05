@@ -40,6 +40,19 @@ module Mongoid
       Array(fields).flatten.reject(&:blank?).map(&:to_s)
     end
 
+    ##
+    # Validates whether the given field is valid. Raises an error otherwise.
+    #
+    # @param [Mongoid::Fields::Standard] field The field to be validated.
+    # @raise [Mongoid::FieldInheritance::UninheritableError] Raises when a
+    #   given field may not be used for inheritance.
+    # @return [void]
+    def self.validate_field!(field)
+      return unless field.name.in?(Mongoid::FieldInheritance::INVALID_FIELDS)
+      fail Mongoid::FieldInheritance::UninheritableError.new(
+        field.options[:klass], field), "Field is not inheritable: #{field.name}"
+    end
+
     private
 
     ##

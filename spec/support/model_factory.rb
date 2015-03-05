@@ -1,5 +1,5 @@
 module ModelFactory
-  extend self
+  module_function
 
   def create_basic_model(name = 'TempModel', &block)
     if Object.const_defined?(name)

@@ -14,6 +14,26 @@ module Mongoid
       end
 
       ##
+      # Registers an inheritable field with a specific inheritor in a model.
+      #
+      # @param [Class] model The model.
+      # @param [Symbol, String] name The name of the field.
+      # @param [Symbol, #call] inheritor A Symbol referencing to an instance
+      #   method of the model or a callable that defines an inheritance action.
+      def self.register_inheritable_field(model, name, inheritor = nil)
+        name = name.to_s
+        field = model.fields[name]
+        if field
+          inheritor ||= Mongoid::FieldInheritance::Inheritor
+        else
+          fail ArgumentError, 'No inheritance rule defined'
+        end
+        Mongoid::FieldInheritance.validate_field!(field) if field
+        model.inheritable_fields =
+          model.inheritable_fields.merge(name => inheritor)
+      end
+
+      ##
       # @since 0.1.0
       module ClassMethods
         ##
@@ -43,8 +63,9 @@ module Mongoid
         # A macro which allows defining custom inheritance logic on specific
         # fields or relations.
         #
-        # @param [Array<Symbol, String>] names One or multiple fields that
-        #   will apply the defined inheritance logic.
+        # @param [Array<Symbol, String>] names One or more fields that will
+        #   apply the defined inheritance logic.
+        # @return
         # @yield [name, source, destination] Defines what to do when inheriting
         #   the specified fields.
         # @yieldparam [Symbol] name The name of the inherited field, accessor,
@@ -56,11 +77,11 @@ module Mongoid
         # @yieldreturn [void]
         def inherit(*names, &block)
           options = names.extract_options!
-          inheritor = block || options[:with] || Inheritor
-          names = Mongoid::FieldInheritance.sanitize_field_names(names)
+          inheritor = block || options[:with]
+          names = FieldInheritance.sanitize_field_names(names)
+          fail ArgumentError, 'No field defined' if names.empty?
           names.each do |name|
-            self.inheritable_fields =
-              inheritable_fields.merge(name.to_s => inheritor)
+            Macros.register_inheritable_field(self, name, inheritor)
           end
         end
       end
@@ -68,13 +89,10 @@ module Mongoid
   end
 end
 
-Mongoid::Fields.option :inherit do |model, field, value|
-  if value
-    if field.name.in?(Mongoid::FieldInheritance::INVALID_FIELDS)
-      fail Mongoid::FieldInheritance::UninheritableError.new(model, field),
-           "Field is not inheritable: #{field.name}"
-    end
-    model.inheritable_fields =
-      model.inheritable_fields.merge(field.name => field)
+Mongoid::Fields.option :inherit do |model, field, inheritor|
+  if inheritor
+    inheritor = Mongoid::FieldInheritance::Inheritor if inheritor == true
+    Mongoid::FieldInheritance::Macros
+      .register_inheritable_field(model, field.name, inheritor)
   end
 end
