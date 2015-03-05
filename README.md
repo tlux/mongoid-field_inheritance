@@ -1,5 +1,7 @@
 # mongoid-field_inheritance
 
+[![Code Climate](https://codeclimate.com/github/tlux/mongoid-field_inheritance/badges/gpa.svg)](https://codeclimate.com/github/tlux/mongoid-field_inheritance)
+
 Document-based inheritance for Mongoid.
 
 ### Installation
