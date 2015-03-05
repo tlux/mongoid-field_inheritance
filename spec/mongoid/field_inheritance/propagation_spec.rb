@@ -101,6 +101,10 @@ describe Mongoid::FieldInheritance::Propagation do
           child.children.create inherited_fields: %w(manufacturer)
         end
 
+        let! :grandgrandchild do
+          grandchild.children.create inherited_fields: %w(manufacturer)
+        end
+
         it 'propagates to inherited attribute in child' do
           expect { subject.update(manufacturer: 'Samsung') }.to change {
             child.reload.manufacturer
@@ -111,6 +115,12 @@ describe Mongoid::FieldInheritance::Propagation do
           expect { subject.update(manufacturer: 'HTC') }.to change {
             grandchild.reload.manufacturer
           }.from('Apple').to('HTC')
+        end
+
+        it 'propagates to inherited attribute in great-grandchild' do
+          expect { subject.update(manufacturer: 'Google' )}.to change {
+            grandgrandchild.reload.manufacturer
+          }.from('Apple').to('Google')
         end
 
         it 'does not update inheriting child if nothing has changed' do
@@ -124,48 +134,6 @@ describe Mongoid::FieldInheritance::Propagation do
             child.reload.name
           }
         end
-      end
-    end
-
-    context 'with custom inheritor' do
-      # TODO
-    end
-
-    context 'with custom inheritor on embedded relations' do
-      let! :embedded_model do
-        ModelFactory.create_basic_model 'Property' do
-          embedded_in :product
-
-          field :key
-          field :value, localize: true
-          field :inherited, type: Boolean, default: false
-        end
-      end
-
-      let! :model do
-        ModelFactory.create_model 'Product' do
-          include Mongoid::Timestamps::Updated
-
-          field :name, inherit: true, localize: true
-          field :manufacturer, inherit: true
-
-          embeds_many :properties
-        end
-      end
-
-      context 'with parent' do
-        let! :parent do
-          model.create manufacturer: 'Apple', name: 'iPhone' do |product|
-            product.properties.build(key: 'storage', value: 16_000)
-            product.properties.build(key: 'color', value: 'red')
-          end
-        end
-
-        subject { parent.children.new }
-      end
-
-      context 'with children' do
-        # TODO
       end
     end
   end
