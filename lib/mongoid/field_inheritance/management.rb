@@ -118,7 +118,7 @@ module Mongoid
         return names if invalid_fields.empty?
         fail UninheritableError.new(self, invalid_fields),
              "Field#{invalid_fields.many? ? 's are' : ' is'} not " \
-             "inheritable: " + invalid_fields.join(', ')
+             'inheritable: ' + invalid_fields.join(', ')
       end
 
       def extract_inherited_fields_from_options(options)
@@ -129,7 +129,7 @@ module Mongoid
           Mongoid::FieldInheritance.sanitize_field_names(options[:only])
         elsif options[:except]
           self.class.inheritable_fields.keys -
-          Mongoid::FieldInheritance.sanitize_field_names(options[:except])
+            Mongoid::FieldInheritance.sanitize_field_names(options[:except])
         else
           self.class.inheritable_fields.keys
         end
