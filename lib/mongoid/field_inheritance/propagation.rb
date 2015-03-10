@@ -13,7 +13,7 @@ module Mongoid
 
         before_validation :clear_inherited_fields,
                           if: [:root?, :parent_id_changed?]
-        before_save :inherit_fields_from_parent, if: :parent?
+        before_validation :inherit_fields_from_parent, if: :parent?
         after_update :propagate_fields_to_children, if: :changed?
       end
 
