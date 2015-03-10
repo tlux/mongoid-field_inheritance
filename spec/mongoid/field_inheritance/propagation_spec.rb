@@ -22,7 +22,13 @@ describe Mongoid::FieldInheritance::Propagation do
           parent.children.new(inherited_fields: %w(name manufacturer))
         end
 
-        it 'copies the inheritable fields from parent' do
+        it 'copies the inheritable fields from parent before validation' do
+          expect { subject.valid? }.to(
+            change { subject.manufacturer }.from(nil).to('Apple')
+          )
+        end
+
+        it 'copies the inheritable fields from parent before save' do
           expect { subject.save }.to(
             change { subject.manufacturer }.from(nil).to('Apple')
           )
