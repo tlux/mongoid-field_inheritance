@@ -21,6 +21,7 @@ module Mongoid
 
       include Macros
       include Fields
+      include Relations
       include Validation
       include Propagation
       include Dependent
@@ -68,6 +69,7 @@ end
 
 require 'mongoid/field_inheritance/macros'
 require 'mongoid/field_inheritance/fields'
+require 'mongoid/field_inheritance/relations'
 require 'mongoid/field_inheritance/validation'
 require 'mongoid/field_inheritance/inheritor'
 require 'mongoid/field_inheritance/propagation'
