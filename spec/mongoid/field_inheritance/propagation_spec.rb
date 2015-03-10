@@ -124,7 +124,7 @@ describe Mongoid::FieldInheritance::Propagation do
         end
 
         it 'propagates to inherited attribute in great-grandchild' do
-          expect { subject.update(manufacturer: 'Google' )}.to change {
+          expect { subject.update(manufacturer: 'Google') }.to change {
             grandgrandchild.reload.manufacturer
           }.from('Apple').to('Google')
         end
