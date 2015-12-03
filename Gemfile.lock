@@ -136,9 +136,12 @@ DEPENDENCIES
   activesupport (>= 4.0)
   bundler (~> 1.0)
   jeweler (~> 2.0.1)
-  mongoid (~> 4.0)
-  mongoid-tree (~> 2.0)
+  mongoid (>= 4.0)
+  mongoid-tree (>= 2.0)
   pry-byebug
   rspec
   rubocop
   yard
+
+BUNDLED WITH
+   1.10.6
